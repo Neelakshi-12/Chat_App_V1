@@ -90,24 +90,27 @@ export default class Dashboard extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'column'
+        flexDirection: 'column',
+
     },
     textStyle: {
         fontSize: 15,
         marginBottom: 20,
         marginTop: 30,
         fontWeight: "bold",
-        color: 'white'
+        color: 'red',
+
     },
     textEmail: {
         fontSize: 15,
         marginBottom: 20,
-        color: "#cdcdcd",
+        color: "#000000",
         fontWeight: "bold",
     },
     CreateProfile: {
         marginVertical: 10,
-        minWidth: 100
+        minWidth: 100,
+
     },
     image: {
         flex: 1,
@@ -120,6 +123,6 @@ const styles = StyleSheet.create({
         fontSize: 42,
         fontWeight: "bold",
         textAlign: "center",
-        backgroundColor: "#000000a0"
+        backgroundColor: "#ffffffa0"
     }
 });

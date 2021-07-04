@@ -1,18 +1,9 @@
 import React, { Component } from 'react';
-import {
-    NativeBaseProvider,
-    Box,
-    Heading,
-    VStack,
-    HStack,
-    FormControl,
-    Input,
-    Button,
-    Checkbox,
-} from 'native-base';
-import { ImageBackground, ScrollView, AsyncStorage, StyleSheet, View } from 'react-native';
+import { NativeBaseProvider, Box, Heading, VStack, HStack, FormControl, Input, Button, Select, CheckIcon } from 'native-base';
+import { ImageBackground, ScrollView, AsyncStorage, StyleSheet, View, Alert, Text } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import CheckBox from '@react-native-community/checkbox';
 
 export default class AdminLogin extends Component {
 
@@ -22,15 +13,16 @@ export default class AdminLogin extends Component {
             email: '',
             password: '',
             number: '',
-            checked: false,
+            companyName: '',
+            check: false,
         };
     }
 
     // storeData = () => {
     //     console.log("yoooooo", this.setState.email, this.setState.password)
     // }
-    async storeAdminData(email, password, number, checked) {
-        console.log("adminyoooooo", email, password, number, checked)
+    async storeAdminData(email, password, number, companyName, check) {
+        console.log("adminyoooooo", email, password, number, companyName, check)
         await auth()
             .createUserWithEmailAndPassword(email, password)
             .then(() => {
@@ -42,7 +34,7 @@ export default class AdminLogin extends Component {
                         email: email,
                         password: password,
                         number: number,
-                        checked: checked,
+                        check: check,
 
                     })
                     .then(() => {
@@ -67,6 +59,15 @@ export default class AdminLogin extends Component {
             });
     }
 
+    checkBoxTest = () => {
+
+        this.setState({
+            check: !this.state.check
+        });
+        Alert.alert("now value is" + !this.state.check)
+    }
+
+
 
     render() {
         const image = { uri: "https://i.pinimg.com/564x/a8/b4/42/a8b442181f7c004f98d4eef842a76e76.jpg" };
@@ -89,7 +90,7 @@ export default class AdminLogin extends Component {
                             <View style={styles.text}>
                                 <VStack space={2}>
                                     <FormControl isRequired>
-                                        <FormControl.Label _text={{ color: 'danger.500', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#000000', fontSize: 'sm', fontWeight: 600 }}>
                                             Email ID
                                         </FormControl.Label>
                                         <Input
@@ -98,7 +99,7 @@ export default class AdminLogin extends Component {
                                         />
                                     </FormControl>
                                     <FormControl mt={4} isRequired>
-                                        <FormControl.Label _text={{ color: 'danger.500', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#000000', fontSize: 'sm', fontWeight: 600 }}>
                                             Password
                                         </FormControl.Label>
                                         <Input type="password"
@@ -108,16 +109,17 @@ export default class AdminLogin extends Component {
 
                                     </FormControl>
                                     <FormControl mt={4} isRequired>
-                                        <FormControl.Label _text={{ color: 'danger.500', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#000000', fontSize: 'sm', fontWeight: 600 }}>
                                             Mobile Number
                                         </FormControl.Label>
                                         <Input
                                             onChangeText={(text) => this.setState({ number: text })}
                                             value={this.state.number}
+                                            keyboardType="numeric"
                                         />
                                     </FormControl>
-                                    {/* <FormControl mt={4} isRequired isInvalid>
-                                        <FormControl.Label _text={{ color: 'danger.500', fontSize: 'sm', fontWeight: 600 }}>Company Name</FormControl.Label>
+                                    <FormControl mt={4} isRequired isInvalid>
+                                        <FormControl.Label _text={{ color: '#000000', fontSize: 'sm', fontWeight: 600 }}>Company Name</FormControl.Label>
                                         <Select
                                             minWidth={200}
                                             accessibilityLabel="Select your Company"
@@ -137,29 +139,38 @@ export default class AdminLogin extends Component {
                                             <Select.Item label="Astrea5" value="Astrea5" />
                                         </Select>
 
-                                    </FormControl> */}
+                                    </FormControl>
 
-                                    <FormControl mt={4} isRequired>
+                                    {/* <FormControl mt={4} isRequired>
                                         <HStack space={6}>
                                             <Checkbox accessibilityLabel="This is a dummy checkbox"
-                                                onChangeText={(text) => this.setState({ checked: text })}
+                                                onValueChange={(value) => this.setState({ checked: value })}
                                                 value={this.state.checked}
                                             >
                                                 *Accept Terms and Conditions
                                             </Checkbox>
-                                            {/* <Checkbox
-                                            value="test"
-                                            accessibilityLabel="This is a dummy checkbox"
-                                            defaultIsChecked
-                                        /> */}
+                                          
                                         </HStack>
-                                    </FormControl>
+                                    </FormControl> */}
+
+
+                                    <View style={styles.checked}>
+                                        <CheckBox value={this.state.check} onValueChange={() => { this.checkBoxTest() }} />
+                                        <Text style={styles.terms}> * Accept all Terms and Conditions</Text>
+                                    </View>
+
 
 
 
                                     <VStack space={2}>
                                         <Button colorScheme="danger" _text={{ color: 'white' }}
-                                            onPress={() => this.storeAdminData(this.state.email, this.state.password, this.state.number, this.state.checked)}
+                                            onPress={() => {
+                                                if (this.state.email == '' || this.state.password == '' || this.state.number == '' || this.state.companyName == '' || this.state.check == '') {
+                                                    Alert.alert("All fields marked as * are mandatory");
+                                                } else {
+                                                    this.storeAdminData(this.state.email, this.state.password, this.state.number, this.state.companyName, this.state.check)
+                                                }
+                                            }}
 
                                             mt={4}
                                         >
@@ -197,5 +208,10 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         backgroundColor: "#ffffffa0"
+    },
+    terms: {
+        marginLeft: 30,
+        marginTop: -25,
+        fontWeight: "bold"
     }
 })

@@ -2,21 +2,14 @@ import React, { Component } from 'react';
 import {
     NativeBaseProvider,
     Box,
-    Text,
     Heading,
     VStack,
     FormControl,
     Input,
-    Link,
     Button,
     Select,
-    value,
     CheckIcon,
     View,
-    Icon,
-    IconButton,
-    HStack,
-    Divider
 } from 'native-base';
 import { ImageBackground, ScrollView, AsyncStorage, StyleSheet } from 'react-native';
 import auth from '@react-native-firebase/auth';
@@ -90,7 +83,7 @@ export default class UserLogin extends Component {
                         <Heading size="lg" mt={14} color='danger.500'>
                             Welcome
                         </Heading>
-                        <Heading color="muted.400" mb={17} size="xs">
+                        <Heading color="#ffffff" mb={17} size="xs">
                             Sign in to continue!
                         </Heading>
 
@@ -98,40 +91,44 @@ export default class UserLogin extends Component {
                             <View style={styles.text} mt={10}>
                                 <VStack space={2} >
                                     <FormControl isRequired>
-                                        <FormControl.Label _text={{ color: 'muted.800', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
                                             Email ID
                                         </FormControl.Label>
                                         <Input
                                             onChangeText={(text) => this.setState({ email: text })}
                                             value={this.state.email}
+                                            color='#ffffff'
                                         />
                                     </FormControl>
                                     <FormControl mt={4} isRequired>
-                                        <FormControl.Label _text={{ color: 'muted.800', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
                                             Password
                                         </FormControl.Label>
                                         <Input type="password"
                                             onChangeText={(text) => this.setState({ password: text })}
                                             value={this.state.password}
+                                            color='#ffffff'
                                         />
 
                                     </FormControl>
                                     <FormControl mt={4} isRequired>
-                                        <FormControl.Label _text={{ color: 'muted.800', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
                                             Mobile Number
                                         </FormControl.Label>
                                         <Input
                                             onChangeText={(text) => this.setState({ number: text })}
                                             value={this.state.number}
+                                            color='#ffffff'
                                         />
                                     </FormControl>
                                     <FormControl mt={4} isRequired isInvalid>
-                                        <FormControl.Label _text={{ color: 'muted.800', fontSize: 'sm', fontWeight: 600 }}>Company Name</FormControl.Label>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>Company Name</FormControl.Label>
                                         <Select
                                             minWidth={200}
                                             accessibilityLabel="Select your Company"
                                             placeholder="Select your Company"
                                             value={this.state.companyName}
+                                            color='#ffffff'
                                             onValueChange={(text) => this.setState({ companyName: text })}
                                             _selectedItem={{
                                                 bg: "teal.600",
@@ -179,5 +176,13 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
         justifyContent: "center",
     },
+    text: {
+        color: "white",
+        padding: 25,
+        fontSize: 42,
+        fontWeight: "bold",
+        textAlign: "center",
+        backgroundColor: "#000000a0"
+    }
 
 })

@@ -60,7 +60,7 @@ export default class Dashboard extends Component {
 
     //https://images.pexels.com/photos/1261731/pexels-photo-1261731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940
     render() {
-        const image = { uri: "https://i.pinimg.com/564x/a8/b4/42/a8b442181f7c004f98d4eef842a76e76.jpg" };
+        const image = { uri: "https://image.freepik.com/free-vector/spot-light-background_1284-4685.jpg" };
 
         return (
 

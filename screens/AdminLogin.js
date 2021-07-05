@@ -23,40 +23,48 @@ export default class AdminLogin extends Component {
     // }
     async storeAdminData(email, password, number, companyName, check) {
         console.log("adminyoooooo", email, password, number, companyName, check)
-        await auth()
-            .createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                let uid = auth().currentUser.uid
-                firestore()
-                    .collection('AdminUsers').
-                    add({
-                        id: uid,
-                        email: email,
-                        password: password,
-                        number: number,
-                        check: check,
+        try {
+            await auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    let uid = auth().currentUser.uid
+                    firestore()
+                        .collection('AdminUsers').
+                        add({
+                            id: uid,
+                            email: email,
+                            password: password,
+                            number: number,
+                            check: check,
+                            companyName: companyName,
 
-                    })
-                    .then(() => {
-                        console.log('Admin User added!');
-                        this.props.navigation.navigate("AdminDashboard")
-                        AsyncStorage.setItem("loggedin", 'true');
-                    });
-                console.log('User account created & signed in!');
+                        })
+                        .then((res) => {
 
-            })
-            .catch(error => {
-                if (error.code === 'auth/email-already-in-use') {
-                    console.log('That email address is already in use!');
-                }
+                            console.log('Admin User added!', res);
+                            this.props.navigation.navigate("AdminDashboard")
+                            AsyncStorage.setItem("loggedin", 'true');
+                        });
+                    console.log('User account created & signed in!');
 
-                if (error.code === 'auth/invalid-email') {
-                    console.log('That email address is invalid!');
-                    console.log(email, password)
-                }
-
-                console.error(error);
-            });
+                })
+        }
+        catch (e) {
+            this.setState({ showLoading: false })
+            //console.error(e.message)
+            if (e.message == '[auth/user-not-found] There is no user record corresponding to this identifier. The user may have been deleted.') {
+                Alert.alert('User not found !')
+                console.log(e.message)
+            } else if (e.message == '[auth/wrong-password] The password is invalid or the user does not have a password.') {
+                Alert.alert('The password is invalid or the user does not have a password.')
+                console.log(e.message)
+            } else if (e.message == '[auth/invalid-email] The email address is badly formatted.') {
+                Alert.alert('The email address is badly formatted.')
+            }
+            else {
+                console.log(e.message)
+            }
+        }
     }
 
     checkBoxTest = () => {
@@ -105,6 +113,7 @@ export default class AdminLogin extends Component {
                                         <Input type="password"
                                             onChangeText={(text) => this.setState({ password: text })}
                                             value={this.state.password}
+                                            maxLength={10}
                                         />
 
                                     </FormControl>

@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { Button, View, Text } from 'react-native';
+import { Button, View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AdminLogin from './screens/AdminLogin';
 import UserLogin from './screens/UserLogin';
 import Dashboard from './screens/Dashboard';
 import AdminDashboard from './screens/AdminDashboard';
+import AdminForm from './screens/AdminForm';
+
 function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
@@ -38,10 +40,36 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AdminLogin" component={AdminLogin} />
+        <Stack.Screen
+          name="AdminLogin"
+          component={AdminLogin}
+        // options={{
+
+        //   headerRight: () => (
+        //     <Button
+        //       onPress={() => alert('This is a button!')}
+        //       title="Create"
+        //       color="#f54260"
+        //     />
+        //   ),
+        // }}
+
+
+        />
         <Stack.Screen name="UserLogin" component={UserLogin} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+        <Stack.Screen name="AdminForm" component={AdminForm} />
+        <Stack.Screen name="AdminDashboard" component={AdminDashboard}
+          options={({ navigation }) => ({
+            headerRight: () => (
+              <Button
+                onPress={() => navigation.navigate('AdminForm')}
+                title="Create"
+                color="#f54260"
+              />
+            ),
+          })}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

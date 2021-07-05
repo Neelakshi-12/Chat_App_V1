@@ -25,13 +25,15 @@ export default class Dashboard extends Component {
                     console.log("id", documentSnapshot.data().id)
                     console.log("email", documentSnapshot.data().email)
                     console.log("number", documentSnapshot.data().number)
+                    console.log("companyName", documentSnapshot.data().companyName)
                     console.log("auth().currentUser.uid", auth().currentUser.uid)
                     if (documentSnapshot.data().id == auth().currentUser.uid) {
                         AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
-                        console.log("component did mount", documentSnapshot.data().email, documentSnapshot.data().number)
+                        console.log("component did mount", documentSnapshot.data().email, documentSnapshot.data().number, documentSnapshot.data().companyName)
                         this.setState({
                             email: documentSnapshot.data().email,
                             number: documentSnapshot.data().number,
+                            companyName: documentSnapshot.data().companyName
 
                         })
                     }
@@ -71,6 +73,9 @@ export default class Dashboard extends Component {
                         </Text>
                         <Text style={styles.textEmail}>
                             Contact Here : 🤗 {this.state.number}
+                        </Text>
+                        <Text style={styles.textEmail}>
+                            companyName : 🤗 {this.state.companyName}
                         </Text>
                         <View style={styles.CreateProfile}>
                             <Button

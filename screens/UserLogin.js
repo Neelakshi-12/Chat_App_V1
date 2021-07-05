@@ -30,42 +30,51 @@ export default class UserLogin extends Component {
     // storeData = () => {
     //     console.log("yoooooo", this.setState.email, this.setState.password)
     // }
+
+
     async storeData(email, password, number, companyName) {
         console.log("yoooooo", email, password, companyName, number)
-        await auth()
-            .createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                let uid = auth().currentUser.uid
-                firestore()
-                    .collection('Users').
-                    add({
-                        id: uid,
-                        email: email,
-                        password: password,
-                        number: number,
-                        companyName: companyName,
+        try {
+            await auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    let uid = auth().currentUser.uid
+                    firestore()
+                        .collection('Users').
+                        add({
+                            id: uid,
+                            email: email,
+                            password: password,
+                            number: number,
+                            companyName: companyName,
 
-                    })
-                    .then(() => {
-                        console.log('User added!');
-                        this.props.navigation.navigate("Dashboard")
-                        AsyncStorage.setItem("loggedin", 'true');
-                    });
-                console.log('User account created & signed in!');
+                        })
+                        .then(() => {
+                            console.log('User added!');
+                            this.props.navigation.navigate("Dashboard")
+                            AsyncStorage.setItem("loggedin", 'true');
+                        });
+                    console.log('User account created & signed in!');
 
-            })
-            .catch(error => {
-                if (error.code === 'auth/email-already-in-use') {
-                    console.log('That email address is already in use!');
-                }
+                })
 
-                if (error.code === 'auth/invalid-email') {
-                    console.log('That email address is invalid!');
-                    console.log(email, password)
-                }
-
-                console.error(error);
-            });
+        }
+        catch (e) {
+            this.setState({ showLoading: false })
+            //console.error(e.message)
+            if (e.message == '[auth/user-not-found] There is no user record corresponding to this identifier. The user may have been deleted.') {
+                Alert.alert('User not found !')
+                console.log(e.message)
+            } else if (e.message == '[auth/wrong-password] The password is invalid or the user does not have a password.') {
+                Alert.alert('The password is invalid or the user does not have a password.')
+                console.log(e.message)
+            } else if (e.message == '[auth/invalid-email] The email address is badly formatted.') {
+                Alert.alert('The email address is badly formatted.')
+            }
+            else {
+                console.log(e.message)
+            }
+        }
     }
 
 
@@ -108,6 +117,8 @@ export default class UserLogin extends Component {
                                             onChangeText={(text) => this.setState({ password: text })}
                                             value={this.state.password}
                                             color='#ffffff'
+                                            maxLength={10}
+                                        // secureTextEntry={true}
                                         />
 
                                     </FormControl>
@@ -118,6 +129,7 @@ export default class UserLogin extends Component {
                                         <Input
                                             onChangeText={(text) => this.setState({ number: text })}
                                             value={this.state.number}
+                                            keyboardType='numeric'
                                             color='#ffffff'
                                         />
                                     </FormControl>

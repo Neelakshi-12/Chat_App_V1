@@ -42,7 +42,7 @@ export default class AdminLogin extends Component {
                         .then((res) => {
 
                             console.log('Admin User added!', res);
-                            this.props.navigation.navigate("AdminDashboard")
+                            this.props.navigation.navigate("AdminDashboard", { companyName: this.state.companyName })
                             AsyncStorage.setItem("loggedin", 'true');
                         });
                     console.log('User account created & signed in!');

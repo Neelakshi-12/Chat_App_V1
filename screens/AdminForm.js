@@ -41,9 +41,10 @@ export default class AdminForm extends Component {
                     console.log("companyName", documentSnapshot.data().companyName)
                     if (documentSnapshot.data().id == auth().currentUser.uid) {
                         AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
-                        console.log("component did mount", documentSnapshot.data().companyName)
+                        console.log("component did mount", documentSnapshot.data().companyName, documentSnapshot.data().id)
                         this.setState({
                             companyName: documentSnapshot.data().companyName,
+                            id: documentSnapshot.data().id
 
                         })
                     }
@@ -73,7 +74,8 @@ export default class AdminForm extends Component {
             add({
                 totalInput: this.state.totalInput,
                 inputField: ListArray,
-                companyName: this.state.companyName
+                companyName: this.state.companyName,
+                id: this.state.id
             })
             .then(() => {
                 console.log('Admin Form Created!');
@@ -113,6 +115,12 @@ export default class AdminForm extends Component {
                             <View style={styles.text} mt={3}>
                                 <VStack space={2} >
                                     <FormControl isRequired>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
+                                            Admin ID
+                                        </FormControl.Label>
+                                        <Input style={styles.textEmail}
+                                            value={this.state.id}
+                                        />
                                         <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
                                             Enter Number of Fields
                                         </FormControl.Label>

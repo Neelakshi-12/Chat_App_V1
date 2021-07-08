@@ -7,6 +7,7 @@ import UserLogin from './screens/UserLogin';
 import Dashboard from './screens/Dashboard';
 import AdminDashboard from './screens/AdminDashboard';
 import AdminForm from './screens/AdminForm';
+import UserFeedBack from './screens/UserFeedBack'
 
 function HomeScreen({ navigation }) {
   return (
@@ -59,14 +60,26 @@ function App() {
         <Stack.Screen name="UserLogin" component={UserLogin} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="AdminForm" component={AdminForm} />
+        <Stack.Screen name="UserFeedBack" component={UserFeedBack} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard}
           options={({ navigation }) => ({
             headerRight: () => (
-              <Button
-                onPress={() => navigation.navigate('AdminForm')}
-                title="Create"
-                color="#f54260"
-              />
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ marginRight: 10 }}>
+                  <Button
+                    onPress={() => navigation.navigate('AdminForm')}
+                    title="Create"
+                    color="#f54260"
+                  />
+                </View>
+                {/* <View style={{ marginRight: 10 }}>
+                  <Button
+                    onPress={() => this.logout()}
+                    title="Logout"
+                    color="#f54260"
+                  />
+                </View> */}
+              </View>
             ),
           })}
         />

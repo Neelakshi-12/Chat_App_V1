@@ -1,22 +1,34 @@
 import React, { Component } from 'react';
-import { ImageBackground, StyleSheet, View, Text, Button, AsyncStorage } from 'react-native';
+import {
+    NativeBaseProvider,
+    Box,
+    Heading,
+    VStack,
+    FormControl,
+    Input,
+    Button,
+    Select,
+    CheckIcon,
+    View,
+} from 'native-base';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { ImageBackground, ScrollView, AsyncStorage, StyleSheet, Alert, Text, TextInput } from 'react-native';
 
 export default class Dashboard extends Component {
     constructor() {
         super();
         this.state = {
-            id: '',
-            email: '',
             companyName: '',
-            number: '',
+            inputField: [],
+
         }
     }
 
-
     componentDidMount() {
         // console.log("component did mount")
+        const companyName = this.props.route.params?.companyName ?? 'companyName';
+        console.log("companyName", companyName)
         firestore()
             .collection('Users')
             .get()
@@ -29,19 +41,35 @@ export default class Dashboard extends Component {
                     console.log("auth().currentUser.uid", auth().currentUser.uid)
                     if (documentSnapshot.data().id == auth().currentUser.uid) {
                         AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
-                        console.log("component did mount", documentSnapshot.data().email, documentSnapshot.data().companyName, documentSnapshot.data().number)
+                        console.log("component did mount", documentSnapshot.data().companyName)
                         this.setState({
-                            email: documentSnapshot.data().email,
                             companyName: documentSnapshot.data().companyName,
-                            number: documentSnapshot.data().number,
 
                         })
                     }
 
                 });
             });
+        firestore()
+            .collection('Forms')
+            .where('companyName', '==', companyName)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(documentSnapshot => {
+                    console.log("TotalInputs", documentSnapshot.data().totalInput)
+                    console.log("admin input fields", documentSnapshot.data().inputField)
+                    console.log("admincompanyName", documentSnapshot.data().companyName)
+                    console.log("documentSnapshot.data().id", documentSnapshot.data().id)
+                    console.log("component did mount", documentSnapshot.data().totalInput, documentSnapshot.data().inputField)
+                    this.setState({
+                        inputField: documentSnapshot.data().inputField,
+
+                    })
+                });
+            });
 
     }
+
 
 
     logout = async () => {
@@ -58,59 +86,141 @@ export default class Dashboard extends Component {
         AsyncStorage.setItem("loggedin", "false")
     }
 
-    //https://images.pexels.com/photos/1261731/pexels-photo-1261731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940
+    SubmitFeedback = () => {
+        // Alert.alert("SubmitFeedback")
+        console.log("this.state", this.state)
+        console.log("this.state.inputField", this.state.inputField)
+        console.log("individual items")
+        try {
+            let uid = auth().currentUser.uid
+            firestore()
+                .collection('Feedback')
+                .add({
+                    id: uid,
+                    feedbackData: this.state
+
+                })
+                .then(() => {
+                    console.log('Form Sent!');
+                    this.props.navigation.navigate("Dashboard")
+                });
+            Alert.alert("Feedback form submitted!")
+            console.log('Feedback form submitted!');
+
+        }
+        catch (e) {
+            this.setState({ showLoading: false })
+            console.error(e.message)
+        }
+    }
+
+    handleChange = (item, name) => {
+        console.log("item", item)
+        console.log("name", name)
+        this.setState({
+            [item]: name
+        })
+    }
+
+    list = () => {
+
+        console.log("inputFieldsssss", this.state.inputField)
+
+        return this.state.inputField.map((item, index) => {
+            console.log("item.index", this.state)
+            return (
+                <ScrollView>
+                    <View mt={3} key={index}>
+                        <VStack space={2} >
+                            <FormControl isRequired>
+                                <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.labelFields}>
+                                    {item}
+                                </FormControl.Label>
+                                <Input style={styles.textEmail}
+                                    value={this.state[item]}
+                                    onChangeText={(name) => { this.handleChange(item, name) }}
+                                />
+                            </FormControl>
+                        </VStack>
+                    </View>
+                </ScrollView>
+            );
+        });
+    };
+
+
     render() {
         const image = { uri: "https://image.freepik.com/free-vector/spot-light-background_1284-4685.jpg" };
 
+
+
         return (
-
-            <View style={styles.container}>
+            <NativeBaseProvider>
                 <ImageBackground source={image} style={styles.image}>
-                    <View style={styles.text}>
+                    <Box
+                        flex={1}
+                        p={2}
+                        w="90%"
+                        mx='auto'
+                    >
+                        <Heading size="lg" mt={14} color='danger.500'>
+                            Welcome!!
+                        </Heading>
 
-                        <Text style={styles.textStyle}>
-                            Email Id : {this.state.email} ...👋
-                        </Text>
-                        <Text style={styles.textEmail}>
-                            Company Name : 🤗 {this.state.companyName}
-                        </Text>
-                        <View style={styles.CreateProfile}>
-                            <Button
-                                color="#f22e55"
-                                title="Logout"
-                                onPress={() => this.logout()}
-                            />
+                        <ScrollView>
+                            <View style={styles.text} mt={3}>
+                                <VStack space={2} >
+                                    <FormControl isRequired>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
+                                            Company Name
+                                        </FormControl.Label>
+                                        <Input style={styles.textEmail}
+                                            value={this.state.companyName}
+                                        />
+                                        {/* fieldLabel.map((item)=> {
+                                            <View>
+                                                <Text>
+                                                    {item}
+                                                </Text>
+                                                <TextInput />
+                                            </View>
+                                        }) */}
+                                        {/* <Input style={styles.textEmail}
+                                            value={this.state.inputField}
+                                        /> */}
+                                        <View>{this.list()}</View>;
+                                    </FormControl>
 
-                        </View>
-                    </View>
+                                    <VStack space={2}>
+
+                                        <Button
+                                            colorScheme="danger" _text={{ color: 'white' }}
+
+                                            onPress={() => { this.SubmitFeedback() }}
+                                        >
+                                            Submit
+                                        </Button>
+
+                                        {/* <View>
+                                            {this.state.show &&
+                                                <Text>{JSON.stringify(this.state, null, 4)}</Text>
+                                            }
+                                        </View> */}
+                                    </VStack>
+
+                                </VStack>
+
+                            </View>
+                        </ScrollView>
+                    </Box>
                 </ImageBackground>
-            </View>
-        );
+
+            </NativeBaseProvider >
+        )
     }
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'column'
-    },
-    textStyle: {
-        fontSize: 15,
-        marginBottom: 20,
-        marginTop: 30,
-        fontWeight: "bold",
-        color: 'white'
-    },
-    textEmail: {
-        fontSize: 15,
-        marginBottom: 20,
-        color: "#cdcdcd",
-        fontWeight: "bold",
-    },
-    CreateProfile: {
-        marginVertical: 10,
-        minWidth: 100
-    },
     image: {
         flex: 1,
         resizeMode: "cover",
@@ -123,5 +233,25 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         backgroundColor: "#000000a0"
+    },
+    textEmail: {
+        fontSize: 15,
+        marginBottom: 5,
+        color: "yellow",
+        fontWeight: "bold",
+    },
+    submitadd: {
+        marginLeft: 220,
+    },
+    inputlabel: {
+        marginRight: 80,
+        height: 50,
+    },
+    companyName: {
+        marginTop: 20
+    },
+    labelFields: {
+        marginTop: -8
     }
-});
+
+})

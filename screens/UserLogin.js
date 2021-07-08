@@ -11,7 +11,7 @@ import {
     CheckIcon,
     View,
 } from 'native-base';
-import { ImageBackground, ScrollView, AsyncStorage, StyleSheet } from 'react-native';
+import { ImageBackground, ScrollView, AsyncStorage, StyleSheet, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
@@ -51,7 +51,7 @@ export default class UserLogin extends Component {
                         })
                         .then(() => {
                             console.log('User added!');
-                            this.props.navigation.navigate("Dashboard")
+                            this.props.navigation.navigate("Dashboard", { companyName: companyName })
                             AsyncStorage.setItem("loggedin", 'true');
                         });
                     console.log('User account created & signed in!');

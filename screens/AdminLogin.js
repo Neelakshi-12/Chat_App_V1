@@ -113,7 +113,7 @@ export default class AdminLogin extends Component {
                                         <Input type="password"
                                             onChangeText={(text) => this.setState({ password: text })}
                                             value={this.state.password}
-                                            maxLength={10}
+
                                         />
 
                                     </FormControl>
@@ -125,6 +125,7 @@ export default class AdminLogin extends Component {
                                             onChangeText={(text) => this.setState({ number: text })}
                                             value={this.state.number}
                                             keyboardType="numeric"
+                                            maxLength={10}
                                         />
                                     </FormControl>
                                     <FormControl mt={4} isRequired isInvalid>

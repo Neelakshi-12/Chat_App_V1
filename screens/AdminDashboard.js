@@ -21,8 +21,8 @@ export default class Dashboard extends Component {
         this.setState({
             companyName: companyName
         })
-
         console.log("companyName", companyName)
+        console.log("this.state.feedbackData", this.state.feedbackData)
         firestore()
             .collection('Feedback')
             .where('feedbackData.companyName', "==", companyName)
@@ -39,7 +39,7 @@ export default class Dashboard extends Component {
                     this.setState({
                         userArr: allFields
                     })
-
+                    console.log("this.state.userArr  last", this.state.userArr)
                 })
             })
         this.unsubscribe = this.firestoreRef.onSnapshot(this.getCollection);
@@ -61,32 +61,40 @@ export default class Dashboard extends Component {
                             </Text>
                         </View>
 
-
                         {
-                            this.state.userArr.map((item, i) => {
-                                return (
-                                    <Card containerStyle={{ padding: 10, marginLeft: 30, marginRight: 30 }} >
-                                        {Object.keys(item.feedbackData).map((data, index) => {
-                                            console.log(data)
+                            this.state.userArr != '' ?
+                                <View>
+                                    {
+                                        this.state.userArr.map((item, i) => {
                                             return (
-                                                <>
-                                                    {
-                                                        data != 'inputField' ?
+                                                <Card containerStyle={{ padding: 10, marginLeft: 30, marginRight: 30 }} >
+                                                    {Object.keys(item.feedbackData).map((data, index) => {
+                                                        console.log(data)
+                                                        return (
                                                             <>
-                                                                <View key={index} style={styles.user}>
-                                                                    <Text> {data}: {item.feedbackData[data]} </Text>
-                                                                </View>
+                                                                {
+                                                                    data != 'inputField' ?
+                                                                        <>
+                                                                            <View key={index} style={styles.user}>
+                                                                                <Text> {data}: {item.feedbackData[data]} </Text>
+                                                                            </View>
+                                                                        </>
+                                                                        : null
+                                                                }
                                                             </>
-                                                            : null
+                                                        )
+                                                    })
                                                     }
-                                                </>
-                                            )
+                                                </Card>
+                                            );
                                         })
-                                        }
-                                    </Card>
-                                );
-                            })
+                                    }
+                                </View> :
+                                <View>
+                                    <Text style={styles.textcurrent}>Currently Feedbacks for {this.state.companyName} are not Available</Text>
+                                </View>
                         }
+
                     </ScrollView>
                 </ImageBackground>
             </View>
@@ -130,6 +138,14 @@ const styles = StyleSheet.create({
         paddingTop: 3,
         paddingBottom: 3,
         fontSize: 18,
-    }
+    },
+    textcurrent: {
+        color: "black",
+        padding: 25,
+        fontSize: 32,
+        fontWeight: "bold",
+        textAlign: "center",
+        backgroundColor: "#ffffffa0"
+    },
 
 });

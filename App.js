@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, View, Text, StyleSheet } from 'react-native';
+import { Alert, Button, View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AdminLogin from './screens/AdminLogin';
@@ -7,7 +7,7 @@ import UserLogin from './screens/UserLogin';
 import Dashboard from './screens/Dashboard';
 import AdminDashboard from './screens/AdminDashboard';
 import AdminForm from './screens/AdminForm';
-import UserFeedBack from './screens/UserFeedBack'
+import UpdateAdminForm from './screens/UpdateAdminForm'
 
 function HomeScreen({ navigation }) {
   return (
@@ -60,17 +60,45 @@ function App() {
         <Stack.Screen name="UserLogin" component={UserLogin} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="AdminForm" component={AdminForm} />
-        <Stack.Screen name="UserFeedBack" component={UserFeedBack} />
+        <Stack.Screen name="UpdateAdminForm" component={UpdateAdminForm} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard}
           options={({ navigation }) => ({
             headerRight: () => (
               <View style={{ flexDirection: 'row' }}>
                 <View style={{ marginRight: 10 }}>
                   <Button
-                    onPress={() => navigation.navigate('AdminForm')}
+                    onPress={({ }) => {
+                      Alert.alert(
+                        "Alert!!",
+                        "Would you like to create New form??",
+                        [
+                          {
+                            text: "Cancel",
+                            onPress: () => {
+                              Alert.alert(
+                                "Already Form Created??",
+                                "Would you like to Update your form??",
+                                [
+                                  {
+                                    text: "No",
+                                    onPress: () => console.log("Cancel Pressed"),
+                                    style: "cancel"
+                                  },
+                                  { text: "Yes", onPress: () => navigation.navigate('UpdateAdminForm') }
+                                ]
+                              );
+                            }
+                            ,
+                            style: "cancel"
+                          },
+                          { text: "OK", onPress: () => navigation.navigate('AdminForm') }
+                        ]
+                      );
+                    }}
                     title="Create"
                     color="#f54260"
                   />
+
                 </View>
                 {/* <View style={{ marginRight: 10 }}>
                   <Button

@@ -18,45 +18,77 @@ import { textShadow } from 'styled-system';
 
 var ListArray = [];
 
-export default class AdminForm extends Component {
+export default class UpdateAdminForm extends Component {
 
     constructor() {
         super();
         this.state = {
+            uid: '',
             id: '',
             totalInput: 0,
             inputField: [],
             companyName: '',
             fieldLabel: '',
+            allArr: [],
         };
     }
 
-    componentDidMount() {
-        // console.log("component did mount")
-        firestore()
+    async componentDidMount() {
+        await firestore()
             .collection('AdminUsers')
             .get()
             .then(querySnapshot => {
                 querySnapshot.forEach(documentSnapshot => {
-                    console.log("id", documentSnapshot.data().id)
-                    console.log("companyName", documentSnapshot.data().companyName)
                     if (documentSnapshot.data().id == auth().currentUser.uid) {
                         AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
                         console.log("component did mount", documentSnapshot.data().companyName, documentSnapshot.data().id)
                         this.setState({
                             companyName: documentSnapshot.data().companyName,
-                            id: documentSnapshot.data().id
-
                         })
                     }
 
                 });
             });
+        // console.log("company nameeee", this.state.companyName)
+        firestore()
+            .collection('Forms')
+            .where('companyName', "==", this.state.companyName)
+            .get()
+            .then(querySnapshot => {
+                var allData = [];
+                querySnapshot.forEach(documentSnapshot => {
+                    console.log("id", documentSnapshot.id)
+                    console.log("inputField", documentSnapshot.data().inputField)
+                    console.log("companyName", documentSnapshot.data().companyName)
+                    console.log("total input", documentSnapshot.data().totalInput)
+
+                    allData.push({
+                        uid: documentSnapshot.id,
+                        id: documentSnapshot.data().id,
+                        companyName: documentSnapshot.data().companyName,
+                        inputField: documentSnapshot.data().inputField,
+                        totalInput: documentSnapshot.data().totalInput
+                    });
+                    this.setState({
+                        allData: this.state.allData,
+                        uid: documentSnapshot.id,
+                        id: documentSnapshot.data().id,
+                        companyName: documentSnapshot.data().companyName,
+                        inputField: documentSnapshot.data().inputField,
+                        totalInput: documentSnapshot.data().totalInput
+                    })
+                    console.log("allData", allData)
+                    console.log("this.state.companyName", this.state.companyName)
+                    console.log("this.state.id", this.state.id)
+                    console.log("this.state.uid", this.state.uid)
+                    console.log("this.state.inputfield", this.state.inputField)
+                });
+
+            });
+
     }
 
     add = () => {
-
-
         console.log("inputField", this.state.inputField)
         console.log("totalInput", this.state.totalInput)
         if (ListArray.length < this.state.totalInput && ListArray.indexOf(this.state.fieldLabel.toLowerCase()) === -1) {
@@ -67,32 +99,53 @@ export default class AdminForm extends Component {
         } else {
             Alert.alert("Duplicate Fields are not Allowed.!!")
         }
+    }
+    deleteUser() {
+        console.log('deleteUser', this.state.uid)
+        console.log("delete")
+        firestore().collection('Forms').doc(this.state.uid)
+            .delete()
+            .then((res) => {
+                console.log('Item removed from database', res)
+                // this.props.navigation.navigate('AdminDashboard');
+            })
+    }
 
-
-
-
+    updateForm() {
+        console.log("this.state.id", this.state.uid)
+        const updateDBRef = firestore().collection('Forms').doc(this.state.uid);
+        updateDBRef.set({
+            totalInput: this.state.totalInput,
+            inputField: ListArray,
+            companyName: this.state.companyName,
+            id: this.state.id
+        }).then((docRef) => {
+            this.setState({
+                totalInput: this.state.totalInput,
+                inputField: ListArray,
+                companyName: this.state.companyName,
+                id: this.state.id
+            });
+            // this.props.navigation.navigate('UserScreen');
+            Alert.alert("Form Updated!")
+        })
+            .catch((error) => {
+                console.error("Error: ", error);
+            });
 
     }
-    SubmitValues = () => {
-        console.log("ListArray.length", ListArray.length)
-        console.log("this.state.totalInput", this.state.totalInput)
-        if (ListArray.length == this.state.totalInput) {
-            firestore()
-                .collection('Forms').
-                add({
-                    totalInput: this.state.totalInput,
-                    inputField: ListArray,
-                    companyName: this.state.companyName,
-                    id: this.state.id
-                })
-                .then(() => {
-                    console.log('Admin Form Created!');
-                    Alert.alert("Form Created!!")
-                    this.props.navigation.navigate("AdminDashboard")
-                });
-        } else {
-            Alert.alert("Number of fields must be equal to the labels entered!!")
-        }
+    openTwoButtonAlert = () => {
+        Alert.alert(
+            'Delete Feedback',
+            'Are you sure?',
+            [
+                { text: 'Yes', onPress: () => this.deleteUser() },
+                { text: 'No', onPress: () => console.log('No item was removed'), style: 'cancel' },
+            ],
+            {
+                cancelable: true
+            }
+        );
     }
     render() {
         const image = { uri: "https://image.freepik.com/free-vector/spot-light-background_1284-4685.jpg" };
@@ -122,7 +175,7 @@ export default class AdminForm extends Component {
                         </Heading>
 
                         <ScrollView>
-                            <View style={styles.text} mt={3}>
+                            <View style={styles.text} mt={2}>
                                 <VStack space={2} >
                                     <FormControl isRequired>
                                         {/* <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
@@ -149,38 +202,42 @@ export default class AdminForm extends Component {
                                             color='#ffffff'
                                         />
 
-                                        {this.state.totalInput !== '' && this.state.totalInput > '0' ?
-                                            <View>
-                                                <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
-                                                    Enter Labels
-                                                </FormControl.Label>
-                                                <Input
-                                                    value={this.state.fieldLabel}
-                                                    style={styles.inputlabel}
-                                                    //onChangeText={(text) => this.setState({ totalInput: e.target.value })}
-                                                    onChangeText={(text) => this.setState({ fieldLabel: text })}
-                                                    color='#ffffff'
-                                                />
+                                        <View>
+                                            {/* {
+                                                this.state.allArr.map((item, i) => { */}
+                                            <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
+                                                Enter Labels
+                                            </FormControl.Label>
 
-                                                <Button colorScheme="danger" _text={{ color: 'white' }}
-                                                    onPress={() => { this.add() }}
-                                                    style={styles.submitadd}
-                                                    mt={4}
-                                                >
-                                                    Add
-                                                </Button>
-                                            </View>
-                                            :
-                                            <View>
+                                            <Input
+                                                value={this.state.fieldLabel}
+                                                style={styles.inputlabel}
+                                                //onChangeText={(text) => this.setState({ totalInput: e.target.value })}
+                                                onChangeText={(text) => this.setState({ fieldLabel: text })}
+                                                color='#ffffff'
+                                            />
 
-                                            </View>
-                                        }
+
+                                            {/* }
+                                                )
+                                            } */}
+
+
+                                            <Button colorScheme="danger" _text={{ color: 'white' }}
+                                                onPress={() => { this.add() }}
+                                                style={styles.submitadd}
+                                                mt={4}
+                                            >
+                                                Add
+                                            </Button>
+                                        </View>
+
 
                                     </FormControl>
 
                                     <VStack space={2}>
 
-                                        <Button
+                                        {/* <Button
                                             colorScheme="danger" _text={{ color: 'white' }}
                                             mt={4}
                                             onPress={() => {
@@ -194,7 +251,30 @@ export default class AdminForm extends Component {
                                             Submit
 
 
+                                        </Button> */}
+                                        <Button
+                                            colorScheme="danger" _text={{ color: 'white' }}
+                                            mt={4}
+                                            onPress={() => {
+
+                                                this.updateForm()
+
+                                            }}
+                                        >
+                                            Update
                                         </Button>
+                                        <Button
+                                            colorScheme="danger" _text={{ color: 'white' }}
+                                            mt={4}
+                                            onPress={() => {
+
+                                                this.openTwoButtonAlert()
+
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+
 
                                         {/* <View>
                                             {this.state.show &&
@@ -244,7 +324,7 @@ const styles = StyleSheet.create({
         height: 50,
     },
     companyName: {
-        marginTop: 20
+        marginTop: 5
     }
 
 })

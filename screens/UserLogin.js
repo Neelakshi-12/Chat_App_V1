@@ -117,7 +117,7 @@ export default class UserLogin extends Component {
                                             onChangeText={(text) => this.setState({ password: text })}
                                             value={this.state.password}
                                             color='#ffffff'
-                                            maxLength={10}
+
                                         // secureTextEntry={true}
                                         />
 
@@ -131,6 +131,7 @@ export default class UserLogin extends Component {
                                             value={this.state.number}
                                             keyboardType='numeric'
                                             color='#ffffff'
+                                            maxLength={10}
                                         />
                                     </FormControl>
                                     <FormControl mt={4} isRequired isInvalid>
@@ -158,8 +159,15 @@ export default class UserLogin extends Component {
                                     </FormControl>
                                     <VStack space={2}>
                                         <Button colorScheme="danger" _text={{ color: 'white' }}
-                                            onPress={() => this.storeData(this.state.email, this.state.password, this.state.number, this.state.companyName)}
 
+
+                                            onPress={() => {
+                                                if (this.state.email == '' || this.state.password == '' || this.state.number == '' || this.state.companyName == '') {
+                                                    Alert.alert("All fields marked as * are mandatory");
+                                                } else {
+                                                    this.storeData(this.state.email, this.state.password, this.state.number, this.state.companyName)
+                                                }
+                                            }}
                                             mt={4}
                                         >
                                             Login as a User

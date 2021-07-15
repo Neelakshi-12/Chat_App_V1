@@ -4,6 +4,7 @@ import {
     Box,
     Heading,
     VStack,
+    HStack,
     FormControl,
     Input,
     Button,
@@ -11,72 +12,48 @@ import {
     CheckIcon,
     View,
 } from 'native-base';
-import { ImageBackground, ScrollView, AsyncStorage, StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Text, Image, ImageBackground, ScrollView, Dimensions, TextInput, AsyncStorage, TouchableOpacity } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+class UserLogin extends Component {
 
-export default class UserLogin extends Component {
-
-    constructor() {
-        super();
-        this.state = {
-            email: '',
-            password: '',
-            companyName: '',
-            number: '',
-        };
+    state = {
+        email: '',
+        password: '',
+        companyName: '',
     }
 
-    // storeData = () => {
-    //     console.log("yoooooo", this.setState.email, this.setState.password)
-    // }
-
-
-    async storeData(email, password, number, companyName) {
-        console.log("yoooooo", email, password, companyName, number)
+    async login(email, password) {
         try {
-            await auth()
-                .createUserWithEmailAndPassword(email, password)
-                .then(() => {
-                    let uid = auth().currentUser.uid
-                    firestore()
-                        .collection('Users').
-                        add({
-                            id: uid,
-                            email: email,
-                            password: password,
-                            number: number,
-                            companyName: companyName,
-
-                        })
-                        .then(() => {
-                            console.log('User added!');
-                            this.props.navigation.navigate("Dashboard", { companyName: companyName })
-                            AsyncStorage.setItem("loggedin", 'true');
-                        });
-                    console.log('User account created & signed in!');
-
-                })
-
-        }
-        catch (e) {
-            this.setState({ showLoading: false })
-            //console.error(e.message)
-            if (e.message == '[auth/user-not-found] There is no user record corresponding to this identifier. The user may have been deleted.') {
-                Alert.alert('User not found !')
-                console.log(e.message)
-            } else if (e.message == '[auth/wrong-password] The password is invalid or the user does not have a password.') {
-                Alert.alert('The password is invalid or the user does not have a password.')
-                console.log(e.message)
-            } else if (e.message == '[auth/invalid-email] The email address is badly formatted.') {
-                Alert.alert('The email address is badly formatted.')
+            let response = await auth().signInWithEmailAndPassword(email, password)
+            if (response && response.user) {
+                this.props.navigation.navigate("Dashboard")
+                AsyncStorage.setItem("loggedin", 'true');
             }
-            else {
-                console.log(e.message)
-            }
+        } catch (e) {
+            console.error(e.message)
         }
     }
+    // async componentDidMount() {
+    //     firestore()
+    //         .collection('Users')
+    //         .get()
+    //         .then(querySnapshot => {
+    //             querySnapshot.forEach(documentSnapshot => {
+    //                 console.log("companyNameeeeeeeeeeeeeeeeeee in  login", documentSnapshot.data().companyName)
+    //                 console.log("auth().currentUser.uid", auth().currentUser.uid)
+    //                 if (documentSnapshot.data().id == auth().currentUser.uid) {
+    //                     AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
+    //                     console.log("component did mount", documentSnapshot.data().companyName)
+    //                     this.setState({
+    //                         companyName: documentSnapshot.data().companyName,
 
+    //                     })
+    //                 }
+
+    //             });
+    //         });
+    // }
 
     render() {
         const image = { uri: "https://image.freepik.com/free-vector/spot-light-background_1284-4685.jpg" };
@@ -93,79 +70,48 @@ export default class UserLogin extends Component {
                             Welcome
                         </Heading>
                         <Heading color="#ffffff" mb={17} size="xs">
-                            Sign in to continue!
+                            Login in to continue!
                         </Heading>
+
 
                         <ScrollView>
                             <View style={styles.text} mt={10}>
                                 <VStack space={2} >
                                     <FormControl isRequired>
-                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 900 }}>
                                             Email ID
                                         </FormControl.Label>
                                         <Input
-                                            onChangeText={(text) => this.setState({ email: text })}
                                             value={this.state.email}
+                                            keyboardType='email-address'
+                                            mode="outlined"
                                             color='#ffffff'
-                                        />
+                                            onChangeText={text => this.setState({ email: text })} />
+
+
                                     </FormControl>
                                     <FormControl mt={4} isRequired>
-                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
+                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 900 }}>
                                             Password
                                         </FormControl.Label>
                                         <Input type="password"
                                             onChangeText={(text) => this.setState({ password: text })}
                                             value={this.state.password}
                                             color='#ffffff'
-
-                                        // secureTextEntry={true}
+                                            secureTextEntry={true}
                                         />
 
                                     </FormControl>
-                                    <FormControl mt={4} isRequired>
-                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
-                                            Mobile Number
-                                        </FormControl.Label>
-                                        <Input
-                                            onChangeText={(text) => this.setState({ number: text })}
-                                            value={this.state.number}
-                                            keyboardType='numeric'
-                                            color='#ffffff'
-                                            maxLength={10}
-                                        />
-                                    </FormControl>
-                                    <FormControl mt={4} isRequired isInvalid>
-                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>Company Name</FormControl.Label>
-                                        <Select
-                                            minWidth={200}
-                                            accessibilityLabel="Select your Company"
-                                            placeholder="Select your Company"
-                                            value={this.state.companyName}
-                                            color='#ffffff'
-                                            onValueChange={(text) => this.setState({ companyName: text })}
-                                            _selectedItem={{
-                                                bg: "teal.600",
-                                                endIcon: <CheckIcon size={5} />,
-                                            }}
-                                            mt={1}
-                                        >
-                                            <Select.Item label="Astrea1" value="Astrea1" />
-                                            <Select.Item label="Astrea2" value="Astrea2" />
-                                            <Select.Item label="Astrea3" value="Astrea3" />
-                                            <Select.Item label="Astrea4" value="Astrea4" />
-                                            <Select.Item label="Astrea5" value="Astrea5" />
-                                        </Select>
 
-                                    </FormControl>
                                     <VStack space={2}>
                                         <Button colorScheme="danger" _text={{ color: 'white' }}
 
-
                                             onPress={() => {
-                                                if (this.state.email == '' || this.state.password == '' || this.state.number == '' || this.state.companyName == '') {
-                                                    Alert.alert("All fields marked as * are mandatory");
+                                                if (this.state.email == ' ' || this.state.password == ' ') {
+                                                    Toast.show("All fields marked as * are mandatory");
+
                                                 } else {
-                                                    this.storeData(this.state.email, this.state.password, this.state.number, this.state.companyName)
+                                                    this.login(this.state.email, this.state.password)
                                                 }
                                             }}
                                             mt={4}
@@ -173,12 +119,16 @@ export default class UserLogin extends Component {
                                             Login as a User
                                         </Button>
                                     </VStack>
-                                    {/* <HStack justifyContent="center">
-                                    <Text fontSize='sm' color='muted.700' fontWeight={400}>I'm a new user. </Text>
-                                    <Link _text={{ color: 'danger.500', bold: true, fontSize: 'sm' }} href="#">
-                                        Sign Up
-                                    </Link>
-                                </HStack> */}
+                                    <HStack justifyContent="center">
+                                        {/* <Text fontSize='sm' color='muted.700' fontWeight={400}>Already Have an Account. </Text>
+                                        <Link _text={{ color: 'danger.500', bold: true, fontSize: 'sm' }} href="#">
+                                            Sign Up
+                                        </Link> */}
+                                        <TouchableOpacity
+                                            onPress={() => this.props.navigation.navigate("UserSignup")}>
+                                            <Text style={{ color: 'white' }}>New User? Create Account</Text>
+                                        </TouchableOpacity>
+                                    </HStack>
                                 </VStack>
                             </View>
                         </ScrollView>
@@ -206,3 +156,5 @@ const styles = StyleSheet.create({
     }
 
 })
+
+export default UserLogin;

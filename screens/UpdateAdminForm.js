@@ -10,11 +10,12 @@ import {
     Select,
     CheckIcon,
     View,
+    Row,
 } from 'native-base';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { ImageBackground, ScrollView, AsyncStorage, StyleSheet, Alert, Text } from 'react-native';
-import { textShadow } from 'styled-system';
+import { fontSize, textShadow } from 'styled-system';
 
 var ListArray = [];
 
@@ -53,8 +54,7 @@ export default class UpdateAdminForm extends Component {
         firestore()
             .collection('Forms')
             .where('companyName', "==", this.state.companyName)
-            .get()
-            .then(querySnapshot => {
+            .onSnapshot((querySnapshot) => {
                 var allData = [];
                 querySnapshot.forEach(documentSnapshot => {
                     console.log("id", documentSnapshot.id)
@@ -95,11 +95,55 @@ export default class UpdateAdminForm extends Component {
             // this.state.fieldLabel.toLowerCase()
             ListArray.push(this.state.fieldLabel.toLowerCase());
             console.log("ListArray.toString()", ListArray)
+
             Alert.alert("Label Added!!")
         } else {
             Alert.alert("Duplicate Fields are not Allowed.!!")
         }
     }
+    del = (item, i) => {
+
+        console.log("inputField", item)
+        // for (var i = 0; i < this.state.inputField.length; i++) {
+
+        //     if (this.state.inputField[i] === this.state.inputField[0]) {
+        //         this.state.inputField.splice(i, 1);
+        //         i--;
+        //     }
+        // }
+
+        Alert.alert("Delete Function!!")
+        firestore()
+            .collection("Forms")
+            .doc(this.state.uid)
+            .update({
+                inputField: firestore.FieldValue.arrayRemove(item),
+            })
+            .then(r => console.log("YEAAAH"))
+    }
+    // deleteNote=(id,text)=>{
+    //     console.log("deleteing",id);
+    //     console.log("deleting",text);
+    //      firestore()
+    //     .collection('Todo_tasks')
+    //     .doc(id)
+    //     .delete()
+    //     .then(() => {
+    //       console.log("Deleted!");
+    //       Alert.alert("Deleted!!");
+    //     });
+
+    //   }
+    // var arr = [1, 2, 3, 4, 5, 5, 6, 7, 8, 5, 9, 0];
+
+    // for( var i = 0; i < arr.length; i++){ 
+
+    //     if ( arr[i] === 5) { 
+    //         arr.splice(i, 1); 
+    //         i--; 
+    //     }
+    // }
+
     deleteUser() {
         console.log('deleteUser', this.state.uid)
         console.log("delete")
@@ -118,11 +162,12 @@ export default class UpdateAdminForm extends Component {
             totalInput: this.state.totalInput,
             inputField: ListArray,
             companyName: this.state.companyName,
-            id: this.state.id
+            id: this.state.id,
+            // inputField: firestore.FieldValue.arrayUnion(item),
         }).then((docRef) => {
             this.setState({
                 totalInput: this.state.totalInput,
-                inputField: ListArray,
+                inputField: 'ListArray',
                 companyName: this.state.companyName,
                 id: this.state.id
             });
@@ -150,19 +195,11 @@ export default class UpdateAdminForm extends Component {
     render() {
         const image = { uri: "https://image.freepik.com/free-vector/spot-light-background_1284-4685.jpg" };
 
-        const inputs = [];
 
-        for (let i = 1; i <= this.state.total; i++) {
-            inputs.push(
-                <Input name={`input-${i}`} onChange={this.onChange}
-                    placeholder="Enter Details"
-                />
-            )
-        }
-
-
+        console.log("allData inside", this.state.inputField)
         return (
-            <NativeBaseProvider>
+
+            < NativeBaseProvider >
                 <ImageBackground source={image} style={styles.image}>
                     <Box
                         flex={1}
@@ -196,19 +233,36 @@ export default class UpdateAdminForm extends Component {
                                         <Input
                                             value={this.state.totalInput}
                                             keyboardType='numeric'
-                                            // onclick={this.myFunction()}
-                                            //onChangeText={(text) => this.setState({ totalInput: e.target.value })}
                                             onChangeText={(text) => this.setState({ totalInput: text })}
                                             color='#ffffff'
                                         />
 
                                         <View>
-                                            {/* {
-                                                this.state.allArr.map((item, i) => { */}
+
+                                            <Text style={styles.headingtwo}>Previous Entered Labels</Text>
+                                            {
+                                                console.log("this.state.inputField inside array", this.state.inputField),
+                                                this.state.inputField && this.state.inputField.map((item, i) => {
+
+                                                    return (
+                                                        <View key={i}>
+                                                            <Text style={styles.previousLable}>{i} {item} </Text>
+                                                            <Button colorScheme="warning"
+                                                                onPress={() => { this.del(item, i) }}
+                                                                style={styles.submitdel}  >❌ </Button>
+
+                                                        </View>
+                                                    )
+
+
+                                                })
+
+                                            }
+
+
                                             <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
                                                 Enter Labels
                                             </FormControl.Label>
-
                                             <Input
                                                 value={this.state.fieldLabel}
                                                 style={styles.inputlabel}
@@ -217,10 +271,6 @@ export default class UpdateAdminForm extends Component {
                                                 color='#ffffff'
                                             />
 
-
-                                            {/* }
-                                                )
-                                            } */}
 
 
                                             <Button colorScheme="danger" _text={{ color: 'white' }}
@@ -325,6 +375,27 @@ const styles = StyleSheet.create({
     },
     companyName: {
         marginTop: 5
+    },
+    previousLable: {
+        color: 'white',
+        marginTop: 3,
+        fontSize: 18,
+        textTransform: 'capitalize',
+        width: '50%',
+        borderRadius: 5,
+        backgroundColor: "#fa2a5b",
+        padding: 10
+    },
+    headingtwo: {
+        color: 'white',
+        fontWeight: 'bold',
+        marginTop: 10,
+    },
+    submitdel: {
+        marginLeft: 220,
+        marginTop: -45,
+        marginBottom: 13,
+        padding: 0
     }
 
 })

@@ -1,13 +1,21 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 import { Alert, Button, View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AdminLogin from './screens/AdminLogin';
+import AdminSignup from './screens/AdminSignup';
+import UserSignup from './screens/UserSignup';
 import UserLogin from './screens/UserLogin';
+import AdminLogin from './screens/AdminLogin';
+
+
 import Dashboard from './screens/Dashboard';
 import AdminDashboard from './screens/AdminDashboard';
 import AdminForm from './screens/AdminForm';
 import UpdateAdminForm from './screens/UpdateAdminForm'
+
+import firestore from '@react-native-firebase/firestore';
+
+const Stack = createStackNavigator();
 
 function HomeScreen({ navigation }) {
   return (
@@ -32,88 +40,47 @@ function HomeScreen({ navigation }) {
   );
 }
 
+class App extends Component {
 
+  render() {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen}
+            options={{ headerShown: false }} />
+          <Stack.Screen
+            name="AdminSignup"
+            component={AdminSignup}
+          />
+          <Stack.Screen name="UserSignup" component={UserSignup} />
+          <Stack.Screen name="UserLogin" component={UserLogin} />
+          <Stack.Screen name="AdminLogin" component={AdminLogin} />
 
-const Stack = createStackNavigator();
+          <Stack.Screen name="Dashboard" component={Dashboard} />
+          <Stack.Screen name="AdminForm" component={AdminForm} />
+          <Stack.Screen name="UpdateAdminForm" component={UpdateAdminForm} />
+          <Stack.Screen name="AdminDashboard" component={AdminDashboard}
+            options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row' }}>
+                  <View style={{ marginRight: 10 }}>
+                    <Button
+                      onPress={() => {
+                        navigation.navigate('AdminForm')
+                      }}
+                      title="Create"
+                      color="#f54260"
+                    />
 
-function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen
-          name="AdminLogin"
-          component={AdminLogin}
-        // options={{
-
-        //   headerRight: () => (
-        //     <Button
-        //       onPress={() => alert('This is a button!')}
-        //       title="Create"
-        //       color="#f54260"
-        //     />
-        //   ),
-        // }}
-
-
-        />
-        <Stack.Screen name="UserLogin" component={UserLogin} />
-        <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="AdminForm" component={AdminForm} />
-        <Stack.Screen name="UpdateAdminForm" component={UpdateAdminForm} />
-        <Stack.Screen name="AdminDashboard" component={AdminDashboard}
-          options={({ navigation }) => ({
-            headerRight: () => (
-              <View style={{ flexDirection: 'row' }}>
-                <View style={{ marginRight: 10 }}>
-                  <Button
-                    onPress={({ }) => {
-                      Alert.alert(
-                        "Alert!!",
-                        "Would you like to create New form??",
-                        [
-                          {
-                            text: "Cancel",
-                            onPress: () => {
-                              Alert.alert(
-                                "Already Form Created??",
-                                "Would you like to Update your form??",
-                                [
-                                  {
-                                    text: "No",
-                                    onPress: () => console.log("Cancel Pressed"),
-                                    style: "cancel"
-                                  },
-                                  { text: "Yes", onPress: () => navigation.navigate('UpdateAdminForm') }
-                                ]
-                              );
-                            }
-                            ,
-                            style: "cancel"
-                          },
-                          { text: "OK", onPress: () => navigation.navigate('AdminForm') }
-                        ]
-                      );
-                    }}
-                    title="Create"
-                    color="#f54260"
-                  />
-
+                  </View>
                 </View>
-                {/* <View style={{ marginRight: 10 }}>
-                  <Button
-                    onPress={() => this.logout()}
-                    title="Logout"
-                    color="#f54260"
-                  />
-                </View> */}
-              </View>
-            ),
-          })}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+              ),
+            })}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
 }
 
 export default App;

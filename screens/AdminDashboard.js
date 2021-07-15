@@ -3,7 +3,7 @@ import { ImageBackground, StyleSheet, View, Text, Button, AsyncStorage, ScrollVi
 import auth from '@react-native-firebase/auth';
 import { ListItem, Card } from 'react-native-elements'
 import firestore from '@react-native-firebase/firestore';
-import { marginTop } from 'styled-system';
+import { fontSize, marginTop } from 'styled-system';
 
 export default class Dashboard extends Component {
     constructor() {
@@ -15,17 +15,31 @@ export default class Dashboard extends Component {
             feedbackData: [],
         }
     }
-    componentDidMount() {
-        const companyName = this.props.route.params?.companyName ?? 'companyName';
-        console.log("companyNameaaaaaaaa", companyName)
-        this.setState({
-            companyName: companyName
-        })
-        console.log("companyName", companyName)
-        console.log("this.state.feedbackData", this.state.feedbackData)
+
+
+
+    async componentDidMount() {
+        await firestore()
+            .collection('AdminUsers')
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(documentSnapshot => {
+                    console.log("companyNameeeeeeeeeeeeeeeeeee in  login", documentSnapshot.data().companyName)
+                    console.log("auth().currentUser.uid", auth().currentUser.uid)
+                    if (documentSnapshot.data().id == auth().currentUser.uid) {
+                        AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
+                        console.log("component did mount", documentSnapshot.data().companyName)
+                        this.setState({
+                            companyName: documentSnapshot.data().companyName,
+
+                        })
+                    }
+
+                });
+            });
         firestore()
             .collection('Feedback')
-            .where('feedbackData.companyName', "==", companyName)
+            .where('feedbackData.companyName', "==", this.state.companyName)
             .get()
             .then(querySnapshot => {
                 var allFields = [];
@@ -76,7 +90,7 @@ export default class Dashboard extends Component {
                                                                     data != 'inputField' ?
                                                                         <>
                                                                             <View key={index} style={styles.user}>
-                                                                                <Text> {data}: {item.feedbackData[data]} </Text>
+                                                                                <Text style={styles.textInside}> {data}: {item.feedbackData[data]} </Text>
                                                                             </View>
                                                                         </>
                                                                         : null
@@ -91,7 +105,13 @@ export default class Dashboard extends Component {
                                     }
                                 </View> :
                                 <View>
-                                    <Text style={styles.textcurrent}>Currently Feedbacks for {this.state.companyName} are not Available</Text>
+                                    <Text style={styles.textcurrent}>Currently Feedbacks for {this.state.companyName} are not Available
+
+                                    </Text>
+
+                                    {/* setTimeout(()=>{
+              // Add your logic for the transition
+         }, 5000); */}
                                 </View>
                         }
 
@@ -140,12 +160,20 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     textcurrent: {
-        color: "black",
+        color: "white",
         padding: 25,
         fontSize: 32,
         fontWeight: "bold",
         textAlign: "center",
-        backgroundColor: "#ffffffa0"
+        marginTop: 190
+        // backgroundColor: "#ffffffa0"
     },
+    createButton: {
+        width: '40%'
+    },
+    textInside: {
+        textTransform: 'capitalize',
+        fontSize: 16
+    }
 
 });

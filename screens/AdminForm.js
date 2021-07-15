@@ -8,6 +8,7 @@ import {
     Input,
     Button,
     Select,
+    ActivityIndicator,
     CheckIcon,
     View,
 } from 'native-base';
@@ -28,18 +29,21 @@ export default class AdminForm extends Component {
             inputField: [],
             companyName: '',
             fieldLabel: '',
+            isFormAvailable: false,
         };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+
+
         // console.log("component did mount")
-        firestore()
+        await firestore()
             .collection('AdminUsers')
             .get()
             .then(querySnapshot => {
                 querySnapshot.forEach(documentSnapshot => {
-                    console.log("id", documentSnapshot.data().id)
-                    console.log("companyName", documentSnapshot.data().companyName)
+                    // console.log("id", documentSnapshot.data().id)
+                    // console.log("companyName", documentSnapshot.data().companyName)
                     if (documentSnapshot.data().id == auth().currentUser.uid) {
                         AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
                         console.log("component did mount", documentSnapshot.data().companyName, documentSnapshot.data().id)
@@ -52,8 +56,58 @@ export default class AdminForm extends Component {
 
                 });
             });
+
+        firestore()
+            .collection('Forms')
+            .where("companyName", '==', this.state.companyName)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(documentSnapshot => {
+                    console.log("hello testing")
+                    console.log("component did mount", documentSnapshot.data().id)
+                    this.setState({
+                        isFormAvailable: true,
+                        id: documentSnapshot.data().id
+                    })
+                });
+            });
     }
 
+    updateFeedback = () => {
+        console.log("updateFeedback")
+        Alert.alert(
+            "Alert!!",
+            "Would you like to create New form??",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => {
+                        Alert.alert(
+                            "Already Form Created??",
+                            "Would you like to Update your form??",
+                            [
+                                {
+                                    text: "No",
+                                    onPress: () => this.props.navigation.navigate('AdminDashboard'),
+                                    style: "cancel"
+                                },
+                                { text: "Yes", onPress: () => this.props.navigation.navigate('UpdateAdminForm') }
+                            ]
+                        );
+                    }
+                    ,
+                    style: "cancel"
+                },
+                {
+                    text: "OK", onPress: () => {
+                        this.setState({
+                            isFormAvailable: false,
+                        })
+                    }
+                }
+            ]
+        );
+    }
     add = () => {
 
 
@@ -95,17 +149,19 @@ export default class AdminForm extends Component {
         }
     }
     render() {
+
+        console.log(" this.state.isFormAvailable ", this.state.isFormAvailable)
         const image = { uri: "https://image.freepik.com/free-vector/spot-light-background_1284-4685.jpg" };
 
-        const inputs = [];
+        // const inputs = [];
 
-        for (let i = 1; i <= this.state.total; i++) {
-            inputs.push(
-                <Input name={`input-${i}`} onChange={this.onChange}
-                    placeholder="Enter Details"
-                />
-            )
-        }
+        // for (let i = 1; i <= this.state.total; i++) {
+        //     inputs.push(
+        //         <Input name={`input-${i}`} onChange={this.onChange}
+        //             placeholder="Enter Details"
+        //         />
+        //     )
+        // }
 
 
         return (
@@ -122,90 +178,99 @@ export default class AdminForm extends Component {
                         </Heading>
 
                         <ScrollView>
-                            <View style={styles.text} mt={3}>
-                                <VStack space={2} >
-                                    <FormControl isRequired>
-                                        {/* <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
+                            {
+                                this.state.isFormAvailable ?
+                                    <>
+                                        {this.updateFeedback()}
+                                    </> :
+                                    <View style={styles.text} mt={3}>
+                                        <VStack space={2} >
+                                            <FormControl isRequired>
+                                                {/* <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
                                             Admin ID
                                         </FormControl.Label>
                                         <Input style={styles.textEmail}
                                             value={this.state.id}
                                         /> */}
-                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
-                                            Company Name
-                                        </FormControl.Label>
-                                        <Input style={styles.textEmail}
-                                            value={this.state.companyName}
-                                        />
-                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
-                                            Enter Number of Fields
-                                        </FormControl.Label>
-                                        <Input
-                                            value={this.state.totalInput}
-                                            keyboardType='numeric'
-                                            // onclick={this.myFunction()}
-                                            //onChangeText={(text) => this.setState({ totalInput: e.target.value })}
-                                            onChangeText={(text) => this.setState({ totalInput: text })}
-                                            color='#ffffff'
-                                        />
-
-                                        {this.state.totalInput !== '' && this.state.totalInput > '0' ?
-                                            <View>
                                                 <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
-                                                    Enter Labels
+                                                    Company Name
+                                                </FormControl.Label>
+                                                <Input style={styles.textEmail}
+                                                    value={this.state.companyName}
+                                                />
+                                                <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }}>
+                                                    Enter Number of Fields
                                                 </FormControl.Label>
                                                 <Input
-                                                    value={this.state.fieldLabel}
-                                                    style={styles.inputlabel}
+                                                    value={this.state.totalInput}
+                                                    keyboardType='numeric'
+                                                    // onclick={this.myFunction()}
                                                     //onChangeText={(text) => this.setState({ totalInput: e.target.value })}
-                                                    onChangeText={(text) => this.setState({ fieldLabel: text })}
+                                                    onChangeText={(text) => this.setState({ totalInput: text })}
                                                     color='#ffffff'
                                                 />
 
-                                                <Button colorScheme="danger" _text={{ color: 'white' }}
-                                                    onPress={() => { this.add() }}
-                                                    style={styles.submitadd}
-                                                    mt={4}
-                                                >
-                                                    Add
-                                                </Button>
-                                            </View>
-                                            :
-                                            <View>
+                                                {this.state.totalInput !== '' && this.state.totalInput > '0' ?
+                                                    <View>
+                                                        <FormControl.Label _text={{ color: '#ffffff', fontSize: 'sm', fontWeight: 600 }} style={styles.companyName}>
+                                                            Enter Labels
+                                                        </FormControl.Label>
+                                                        <Input
+                                                            value={this.state.fieldLabel}
+                                                            style={styles.inputlabel}
+                                                            //onChangeText={(text) => this.setState({ totalInput: e.target.value })}
+                                                            onChangeText={(text) => this.setState({ fieldLabel: text })}
+                                                            color='#ffffff'
+                                                        />
 
-                                            </View>
-                                        }
+                                                        <Button colorScheme="danger" _text={{ color: 'white' }}
+                                                            onPress={() => { this.add() }}
+                                                            style={styles.submitadd}
+                                                            mt={4}
+                                                        >
+                                                            Add
+                                                        </Button>
+                                                    </View>
+                                                    :
+                                                    <View>
 
-                                    </FormControl>
-
-                                    <VStack space={2}>
-
-                                        <Button
-                                            colorScheme="danger" _text={{ color: 'white' }}
-                                            mt={4}
-                                            onPress={() => {
-                                                if (this.state.totalInput == '' || this.state.fieldLabel == '') {
-                                                    Alert.alert("All fields marked as * are mandatory , all r not equal");
-                                                } else {
-                                                    this.SubmitValues()
+                                                    </View>
                                                 }
-                                            }}
-                                        >
-                                            Submit
+
+                                            </FormControl>
+
+                                            <VStack space={2}>
+
+                                                <Button
+                                                    colorScheme="danger" _text={{ color: 'white' }}
+                                                    mt={4}
+                                                    onPress={() => {
+                                                        if (this.state.totalInput == '' || this.state.fieldLabel == '') {
+                                                            Alert.alert("All fields marked as * are mandatory , all r not equal");
+                                                        } else {
+                                                            this.SubmitValues()
+                                                        }
+                                                    }}
+                                                >
+                                                    Submit
 
 
-                                        </Button>
+                                                </Button>
 
-                                        {/* <View>
+                                                {/* <View>
                                             {this.state.show &&
                                                 <Text>{JSON.stringify(this.state, null, 4)}</Text>
                                             }
                                         </View> */}
-                                    </VStack>
+                                            </VStack>
 
-                                </VStack>
+                                        </VStack>
 
-                            </View>
+                                    </View>
+
+
+                            }
+
                         </ScrollView>
                     </Box>
                 </ImageBackground>

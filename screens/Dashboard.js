@@ -25,45 +25,56 @@ export default class Dashboard extends Component {
         }
     }
 
-    componentDidMount() {
-        // console.log("component did mount")
-        const companyName = this.props.route.params?.companyName ?? 'companyName';
-        console.log("companyName", companyName)
-        firestore()
+    async componentDidMount() {
+        await firestore()
             .collection('Users')
             .get()
             .then(querySnapshot => {
                 querySnapshot.forEach(documentSnapshot => {
-                    console.log("id", documentSnapshot.data().id)
-                    console.log("email", documentSnapshot.data().email)
-                    console.log("companyName", documentSnapshot.data().companyName)
-                    console.log("number", documentSnapshot.data().number)
-                    console.log("auth().currentUser.uid", auth().currentUser.uid)
+                    // console.log("id", documentSnapshot.data().id)
+                    // console.log("email", documentSnapshot.data().email)
+                    // console.log("companyName", documentSnapshot.data().companyName)
+                    // console.log("number", documentSnapshot.data().number)
+                    // console.log("auth().currentUser.uid", auth().currentUser.uid)
                     if (documentSnapshot.data().id == auth().currentUser.uid) {
                         AsyncStorage.setItem('Userid' + auth().currentUser.uid, documentSnapshot.uid)
-                        console.log("component did mount", documentSnapshot.data().companyName)
+                        //  console.log("component did mount", documentSnapshot.data().companyName)
                         this.setState({
                             companyName: documentSnapshot.data().companyName,
 
                         })
+                        console.log("this.state.companyName", this.state.companyName)
                     }
 
                 });
             });
         firestore()
             .collection('Forms')
-            .where('companyName', '==', companyName)
+            .where('companyName', '==', this.state.companyName)
             .get()
             .then(querySnapshot => {
                 querySnapshot.forEach(documentSnapshot => {
-                    console.log("TotalInputs", documentSnapshot.data().totalInput)
-                    console.log("admin input fields", documentSnapshot.data().inputField)
-                    console.log("admincompanyName", documentSnapshot.data().companyName)
-                    console.log("documentSnapshot.data().id", documentSnapshot.data().id)
-                    console.log("component did mount", documentSnapshot.data().totalInput, documentSnapshot.data().inputField)
+                    // console.log("TotalInputs", documentSnapshot.data().totalInput)
+                    // console.log("admin input fields", documentSnapshot.data().inputField)
+                    // console.log("admincompanyName", documentSnapshot.data().companyName)
+                    // console.log("documentSnapshot.data().id", documentSnapshot.data().id)
+                    // console.log("component did mount", documentSnapshot.data().totalInput, documentSnapshot.data().inputField)
                     this.setState({
                         inputField: documentSnapshot.data().inputField,
 
+                    })
+                });
+            });
+        firestore()
+            .collection('Feedback')
+            .where("id", '==', auth().currentUser.uid)
+            .where('feedbackData.companyName', '==', this.state.companyName)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(documentSnapshot => {
+                    console.log("documentSnapshot.data().id", documentSnapshot.data().id)
+                    this.setState({
+                        id: documentSnapshot.data().id,
                     })
                 });
             });
@@ -72,45 +83,50 @@ export default class Dashboard extends Component {
 
 
 
-    logout = async () => {
-        console.log("hhgj")               //log out
-        this.props.navigation.reset({
-            index: 0,
-            routes: [
-                {
-                    name: 'UserLogin',
-                },
-            ],
-        })
-        auth().signOut()
-        AsyncStorage.setItem("loggedin", "false")
-    }
+    // logout = async () => {
+    //     console.log("hhgj")               //log out
+    //     this.props.navigation.reset({
+    //         index: 0,
+    //         routes: [
+    //             {
+    //                 name: 'UserLogin',
+    //             },
+    //         ],
+    //     })
+    //     auth().signOut()
+    //     AsyncStorage.setItem("loggedin", "false")
+    // }
 
     SubmitFeedback = () => {
-        // Alert.alert("SubmitFeedback")
-        console.log("this.state", this.state)
-        console.log("this.state.inputField", this.state.inputField)
-        console.log("individual items")
-        try {
-            let uid = auth().currentUser.uid
-            firestore()
-                .collection('Feedback')
-                .add({
-                    id: uid,
-                    feedbackData: this.state
+        if (auth().currentUser.uid == this.state.id) {
+            Alert.alert("Hello")
+        } else {
+            // Alert.alert("SubmitFeedback")
+            console.log("this.state", this.state)
+            console.log("this.state.inputField", this.state.inputField)
+            console.log("individual items")
+            try {
+                let uid = auth().currentUser.uid
+                firestore()
+                    .collection('Feedback')
+                    .add({
+                        id: uid,
+                        feedbackData: this.state
 
-                })
-                .then(() => {
-                    console.log('Form Sent!');
-                    this.props.navigation.navigate("Dashboard")
-                });
-            Alert.alert("Feedback form submitted!")
-            console.log('Feedback form submitted!');
+                    })
+                    .then(() => {
+                        console.log('Form Sent!');
+                    });
 
-        }
-        catch (e) {
-            this.setState({ showLoading: false })
-            console.error(e.message)
+                Alert.alert("Feedback form submitted!")
+                this.props.navigation.navigate("UserLogin")
+                console.log('Feedback form submitted!');
+
+            }
+            catch (e) {
+                this.setState({ showLoading: false })
+                console.error(e.message)
+            }
         }
     }
 
@@ -124,10 +140,10 @@ export default class Dashboard extends Component {
 
     list = () => {
 
-        console.log("inputFieldsssss", this.state.inputField)
+        //console.log("inputFieldsssss", this.state.inputField)
 
         return this.state.inputField.map((item, index) => {
-            console.log("item.index", this.state)
+            // console.log("item.index", this.state)
             return (
                 <ScrollView>
                     <View mt={3} key={index}>
